@@ -12,7 +12,7 @@ import ds.tree.Node;
 public abstract class BinaryHeap {
 	private Node mRoot;
 	
-	public boolean insert (int data) {
+	public boolean insert(int data) {
 		if (mRoot == null) {
 			mRoot = new Node(data);
 			return true;
@@ -25,7 +25,7 @@ public abstract class BinaryHeap {
 		return false;
 	}
 	
-	public boolean remove (int data) {
+	public boolean remove(int data) {
 		if (mRoot == null) {
 			return false;
 		}		
