@@ -30,10 +30,9 @@ public class ArrayDequeTest {
 	 
 	public static void Test() {	 
 		ArrayDeque<Integer> adq = new ArrayDeque<Integer>();
-		adq.add(1);
-		adq.addLast(2);
-		adq.addFirst(3);
-		adq.add(4);
+		adq.add(1);//by default, inserts at the end of queue
+		adq.addLast(2); //insert at the end of this queue
+		adq.addFirst(3); //insert at the head of this queue
 
 		System.out.print("pq1: ");	
 		System.out.print("[");
@@ -42,8 +41,9 @@ public class ArrayDequeTest {
 			System.out.print(", ");
 		}
 		
-		adq.removeFirst();
-		adq.removeLast();
+		adq.removeFirst(); // retrieves and removes head of this queue
+		adq.removeLast(); // retrieves and removes tail of this queue
+		adq.remove(); // by default, retrieves and removes head of this queue
 		
 		System.out.print("pq1: ");	
 		System.out.print("[");		

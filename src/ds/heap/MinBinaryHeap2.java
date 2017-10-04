@@ -43,7 +43,7 @@ public class MinBinaryHeap2 {
 		int parentIndex = getParent(childIndex);
 		int parentVal = mHeap.get(parentIndex);
 		
-		if (childVal < parentVal) {
+		if (childVal < parentVal) { //Comparison
 			mHeap.add(parentIndex, childVal);
 			mHeap.add(childIndex, parentVal);
 			heapifyUp(parentIndex);
