@@ -1,31 +1,31 @@
 package ds.graph;
 
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 
 public class Node <T> {
 	private T mData;
-	private LinkedList<Node<T>> mEdgeList; // contains list of directly connected edges
+	private LinkedHashSet<Node<T>> mEdgeSet; // why set? lookup contains() is faster O(1)
 	
 	public Node(T data) {
 		mData = data;
-		mEdgeList = new LinkedList<Node<T>>();		
+		mEdgeSet = new LinkedHashSet<Node<T>>();		
 	}
 	
 	public T getData() {
 		return mData;
 	}
 	
-	public LinkedList<Node<T>> getEdgeList() {
-		return mEdgeList;
+	public LinkedHashSet<Node<T>> getEdgeSet() {
+		return mEdgeSet;
 	}
 	
-	public void addEdge(Node node) {
-		mEdgeList.add(node);		
+	public void addEdge(Node<T> node) {
+		mEdgeSet.add(node);
 	}
 	
 	public Node<T> addEdge(T data) {
 		Node<T> node = new Node<T>(data);
-		mEdgeList.add(node);
+		mEdgeSet.add(node);
 		return node;
-	}	
+	}
 }

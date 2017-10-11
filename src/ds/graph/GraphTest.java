@@ -1,5 +1,8 @@
 package ds.graph;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 public class GraphTest {
 	public static void Test() {
 		System.out.println("[Graph]Test Started..");
@@ -113,9 +116,48 @@ public class GraphTest {
 		
 		graphAL.addEdge("G", "H");
 		
-		//graphAL.printGraph();
-		status = graphAL.isPathAvailable("A", "H");
+//		ArrayList<LinkedList<String>> pathsList = graphAL.getAllPaths("A", "B");
+//		if (pathsList != null) {
+//			System.out.println("Total no.of paths between nodes A and B = " + pathsList.size());
+//			for (LinkedList<String> pathList : pathsList) {
+//				for (String node : pathList) {
+//					System.out.print(node);
+//		            System.out.print(" ");	
+//				}			
+//	            System.out.println();
+//			}	
+//		} else {
+//			System.out.println("No path(s) found between nodes A and B");
+//		}
 		
+		ArrayList<LinkedList<String>> pathsList = graphAL.getMinPaths("A", "G");
+		if (pathsList != null) {
+			System.out.println("Minimum path(s) between nodes A and H = " + pathsList.size());
+			for (LinkedList<String> pathList : pathsList) {
+				for (String node : pathList) {
+					System.out.print(node);
+		            System.out.print(" ");	
+				}			
+	            System.out.println();
+			}	
+		} else {
+			System.out.println("No path(s) found between nodes A and B");
+		}
+		
+		pathsList = graphAL.getMaxPaths("A", "G");
+		if (pathsList != null) {
+			System.out.println("Maximum path(s) between nodes A and H = " + pathsList.size());
+			for (LinkedList<String> pathList : pathsList) {
+				for (String node : pathList) {
+					System.out.print(node);
+		            System.out.print(" ");	
+				}			
+	            System.out.println();
+			}	
+		} else {
+			System.out.println("No path(s) found between nodes A and B");
+		}
+				
 		System.out.println("************************** End TestGraphAL2() *******************");
 		System.out.println();
 	}
