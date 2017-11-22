@@ -17,9 +17,9 @@ public abstract class BinaryHeap {
 			mRoot = new Node(data);
 			return true;
 		}
-		final Node node = insert(mRoot, data);
+		final Node node = insertBFS(mRoot, data);
 		if (node != null) {
-			fixBinaryHeapForInsert(node);
+			heapifyUp(node);
 			return true;
 		}
 		return false;
@@ -29,17 +29,45 @@ public abstract class BinaryHeap {
 		if (mRoot == null) {
 			return false;
 		}		
-		final Node node = remove(mRoot, data); // always remove root node - priority queue
+		final Node node = remove(mRoot, data);
 		if (node != null) {
-			fixBinaryHeapForRemove(node);
+			heapifyDown(node);
 			return true;
 		}
 		return false;
 	}
 	
+	public boolean contains(int data) {
+		if (mRoot == null) {
+			return false;
+		}		
+		final Node node = searchDFS(mRoot, data);		
+		return node != null ? true : false;
+	}
+	
+	public int getMin() {
+		if (mRoot == null) {
+			return -1;
+		}		
+		return mRoot.getData();
+	}	
+	
+	public int extractMin() {
+		if (mRoot == null) {
+			return -1;
+		}		
+		final int rootData = mRoot.getData();
+		final Node node = remove(mRoot, rootData);
+		if (node != null) {
+			heapifyDown(node);
+			return rootData;
+		}
+		return -1;
+	}
+	
 	public abstract boolean compare(int parentData, int childData);
 	
-	private Node insert (Node root, int data) {		
+	private Node insertBFS(Node root, int data) {		
 		final Queue<Node> queue = new LinkedList<Node>();
 		queue.add(root);
 		
@@ -61,8 +89,8 @@ public abstract class BinaryHeap {
 		return null;
 	}
 	
-	private Node remove (Node root, int data) {
-		final Node nodeToRemove = search(root, data);
+	private Node remove(Node root, int data) {
+		final Node nodeToRemove = searchBFS(root, data);
 		if (nodeToRemove == null) {
 			return null;
 		}
@@ -83,25 +111,48 @@ public abstract class BinaryHeap {
 		return nodeToRemove;
 	}
 	
-	private Node search(Node root, int data) {
+	private Node searchDFS(Node root, int data) {
 		if (root == null) {
 			return null;
 		}
-		if (root.getData() == data) {
-			return root;
-		}	
-		Node node = search (root.getLeft(), data);
+		if (root.getData() == data) { 
+			return root; //found
+		}
+		
+		Node node = searchDFS (root.getLeft(), data);
 		if (node == null) {
-			node = search (root.getRight(), data);
+			node = searchDFS (root.getRight(), data);
 		}
 		return node;
 	}
 	
-	private void fixBinaryHeapForInsert (Node node) {
-		final Node parent =  node.getParent();
-		if (parent == null) { // root node
+	/*
+	 * More efficient compare to searchDFS
+	 */
+	private Node searchBFS(Node root, int data) {
+		final Queue<Node> queue = new LinkedList<Node>();
+		queue.add(root);
+		
+		while (!queue.isEmpty()) {
+			final Node node = queue.poll();
+			if (node.getData() == data)
+				return node;
+			
+			if (node.getLeft() != null) {
+				queue.add(node.getLeft());	
+			}
+			if (node.getRight() != null) {
+				queue.add(node.getRight());	
+			}				
+		}
+		return null;
+	}
+	
+	private void heapifyUp(Node node) {
+		if (node == mRoot) // check for root node
 			return; // reached root node - we are done now!
-		}		
+		
+		final Node parent =  node.getParent();
 		if (compare(node.getData(), parent.getData())) {
 			return; // no violation - do nothing
 		}
@@ -110,24 +161,34 @@ public abstract class BinaryHeap {
 		int parentData = parent.getData();
 		parent.setData(node.getData());
 		node.setData(parentData);
-		fixBinaryHeapForInsert(parent); // repeat until tree is fixed		
+		heapifyUp(parent); // repeat until tree is fixed		
 	}
 	
-	private void fixBinaryHeapForRemove(Node node) {		
-		final Node leafNode = getLastLeafNode(mRoot);
-		if (leafNode == null) {
-			return; // Error: It shouldn't come here
-		}		
-		node.setData(leafNode.getData());
+	private void heapifyDown(Node parent) {
+		int parentData = parent.getData();
+		int smallest = parentData;
+		Node nodeToSwap = null;
 		
-		final Node leafParent =  leafNode.getParent();
-		if (leafParent == null) {
-			return; // Error: It shouldn't come here
+		// find the smallest(compare to parent node) child node to swap
+		Node lNode = parent.getLeft();
+		if (lNode != null) {
+			if (lNode.getData() < smallest) {
+				smallest = lNode.getData();
+				nodeToSwap = lNode;
+			}
+		}		
+		Node rNode = parent.getRight();
+		if (rNode != null) {
+			if (rNode.getData() < smallest) {
+				smallest = rNode.getData();
+				nodeToSwap = rNode;
+			}
 		}
-		if (leafParent.getLeft() == leafNode) {
-			leafParent.setLeft(null);
-		} else {
-			leafParent.setRight(null);
+		
+		if (smallest != parentData) {
+			parent.setData(nodeToSwap.getData());
+			nodeToSwap.setData(parentData);
+			heapifyDown(nodeToSwap);
 		}
 	}
 	

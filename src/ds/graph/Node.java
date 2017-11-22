@@ -4,7 +4,7 @@ import java.util.LinkedHashSet;
 
 public class Node <T> {
 	private T mData;
-	private LinkedHashSet<Node<T>> mEdgeSet; // why set? lookup contains() is faster O(1)
+	private LinkedHashSet<Node<T>> mEdgeSet; // why set? lookup contains() is faster O(1)	
 	
 	public Node(T data) {
 		mData = data;

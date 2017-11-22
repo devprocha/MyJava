@@ -20,5 +20,20 @@ public class UtilsTest {
 				System.out.print(i + ",");				
 			}
 		}
-	}	
+	}
+	/*
+	 * O(n)
+	 */
+	private static int findLaregstNumber() {
+		int[] arr = {0, 9, 10, 3, 4, 5, 6, 7, 8, 9};
+		int len = arr.length; //10
+		int largeNum = arr[0];
+		for (int ctr = 0; ctr < len; ctr++) {
+			if (arr[ctr] > largeNum) {
+				largeNum = arr[ctr];
+			}
+		}
+		
+		return largeNum;
+	}
 }

@@ -4,8 +4,8 @@ public class QueueTest {
 	
 	public static void Test() {
 		//LinkedTransferQueueTest.Test();
-		//PriorityQueueTest.Test();
+		PriorityQueueTest.Test();
 		//SynchronousQueueTest.Test();
-		DelayQueueTest.Test();
+		//DelayQueueTest.Test();
 	}
 }

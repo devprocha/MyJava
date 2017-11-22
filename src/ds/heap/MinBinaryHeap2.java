@@ -1,91 +1,210 @@
 package ds.heap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
-public class MinBinaryHeap2 {
+/*
+ * Array representation of Binary Heap
+ * http://www.geeksforgeeks.org/array-representation-of-binary-heap/
+ */
+
+public class MinBinaryHeap2< T extends Comparable <T>> {
 	
-	ArrayList<Integer> mHeap;	
+	ArrayList<T> mHeap;	
 	
 	public MinBinaryHeap2() {
-		mHeap = new ArrayList<Integer>();
+		mHeap = new ArrayList<T>();
 	}
 	
-	public int insert(int data) {
+	/*
+	 * Time Complexity: O(logV)
+	 */	
+	public int insert(T data) {
 		mHeap.add(data); //always insert at the end of the list
 		int index = mHeap.size() - 1;
 		heapifyUp(index);
 		return index;
 	}
 	
-	public int getMin() {
+	/*
+	 * Time Complexity: O(1)
+	 */	
+	public T getMin() {
+		if (mHeap.size() == 0)
+			return null;
+		
 		return mHeap.get(0);
 	}
 	
-	public int extractMin() {
-		int min = getMin();
-		mHeap.add(0, mHeap.get(mHeap.size() - 1)); // replace root node value with last node value 
-		heapifyDown(0);
+	/*
+	 * Time Complexity: O(logV)
+	 */	
+	public T extractMin() {
+		if (mHeap.isEmpty())
+			return null;
+		
+		T min = getMin();
+		int lastIndex = getLastIndex();
+		mHeap.set(0, mHeap.get(lastIndex)); // replace root node value with last node value 
+		mHeap.remove(lastIndex);
+		if (!mHeap.isEmpty()) {
+			heapifyDown(0);	
+		}
 		return min;
 	}
 	
-	public int delete(int index) {
-		int value = mHeap.get(index);
-		mHeap.add(index, mHeap.get(mHeap.size() - 1)); // replace node value with last node value
+	/*
+	 * Time Complexity: O(V)
+	 * Search takes O(V) and heapifying takes O(log V) i.e. O(V) + O (log V) = O(V)
+	 * In Big-O analysis we drop the constants/small values log (V)
+	 * 
+	 */	
+	public boolean delete(T data) {
+		int index = getIndex(data); // O (n)
+		if (index == -1)
+			return false;
+		
+		int lastIndex = getLastIndex();
+		mHeap.set(index, mHeap.get(lastIndex)); // replace node value with last node value
+		mHeap.remove(lastIndex);
 		heapifyDown(index);
-		return 0;
-	}
-	
-	private void heapifyUp(int childIndex) {
-		if (childIndex == 0) // reached root
-			return; 
+		return true;
+	}	
 
-		int childVal = mHeap.get(childIndex);
-		int parentIndex = getParent(childIndex);
-		int parentVal = mHeap.get(parentIndex);
-		
-		if (childVal < parentVal) { //Comparison
-			mHeap.add(parentIndex, childVal);
-			mHeap.add(childIndex, parentVal);
-			heapifyUp(parentIndex);
-		}		
+	/*
+	 * Time Complexity: O(V)
+	 */	
+	public boolean contains(T data) {
+		return mHeap.contains(data);
 	}
 	
-	private void heapifyDown(int parentIndex) {		
-		int parentVal = mHeap.get(parentIndex);		
+	/*
+	 * Time Complexity: O(1)
+	 */	
+	public int size() {
+		return mHeap.size();
+	}
+	
+	public T[] toArray() {
+		T[] tempArr = (T[])mHeap.toArray();
+		return Arrays.copyOf(tempArr, mHeap.size());
+	}
+	
+	public Iterator<T> iterator() {
+		return new BinaryHeapIterator(mHeap);
+	}
+	
+	private int getIndex(T data) {
+		int index = 0;
+		for (T tempData : mHeap) {
+			if (tempData.equals(data))
+				return index;
+			index++;
+		}
+		return -1;		
+	}
+	
+	private int getLastIndex () {
+		return (mHeap.size() - 1);
+	}
+	
+	/*
+	 * Time Complexity: O(logV)
+	 */	
+	private void heapifyUp(int index) {
+		if (index == 0) // reached top (root)
+			return;
+	
+		int pIndex = getParent(index);
+		if (pIndex == -1) {
+			return; //something went wrong
+		}
+		T pData = mHeap.get(pIndex);
+		T data = mHeap.get(index);
+		if (data.compareTo(pData) >= 0) {
+			return; // no violation, do nothing
+		}
 		
-		int leftIndex = getLeft(parentIndex);
-		if (leftIndex != -1) {
-			int leftVal = mHeap.get(leftIndex);		
-			if (parentVal > leftVal) {
-				mHeap.add(parentIndex, leftVal);
-				mHeap.add(leftIndex, parentVal);
-				heapifyDown(leftIndex);
-			}	
-		}		
+		// swap
+		mHeap.set(pIndex, data);
+		mHeap.set(index, pData);
+		heapifyUp(pIndex);
+	}
+	
+	/*
+	 * Time Complexity: O(logV)
+	 */
+	private void heapifyDown(int pIndex) {
+		T pData = mHeap.get(pIndex);
+		T smallestData = pData;
+		int nodeIndexToSwap = -1;
 		
-		int rightIndex = getRight(parentIndex);
-		if (rightIndex != -1) {
-			int rightVal = mHeap.get(rightIndex);		
-			if (parentVal > rightVal) {
-				mHeap.add(parentIndex, rightVal);
-				mHeap.add(rightIndex, parentVal);
-				heapifyDown(rightIndex);
-			}	
+		int lIndex = getLeft(pIndex);
+		if (lIndex != -1) {
+			T lData = mHeap.get(lIndex);
+			if (pData.compareTo(lData) > 0) {
+				smallestData = lData;
+				nodeIndexToSwap = lIndex;
+			}
+		}
+		
+		int rIndex = getRight(pIndex);
+		if (rIndex != -1) {
+			T rData = mHeap.get(rIndex);
+			if (rData.compareTo(smallestData) < 0) {
+				smallestData = rData;
+				nodeIndexToSwap = rIndex;
+			}
 		}		
+		if (smallestData != pData) {
+			// swap
+			mHeap.set(pIndex, smallestData);
+			mHeap.set(nodeIndexToSwap, pData);
+			heapifyDown(nodeIndexToSwap);
+		}
 	}
 	
 	private int getParent(int childIndex) {
-		int parentIndex = (childIndex -1)/2;
+		int parentIndex = (childIndex - 1)/2;
 		return (parentIndex < 0 ? 0 : parentIndex);
 	}
 	
-	private int getLeft(int index) {
-		int leftIndex =  (index * 2 + 1);
-		return (leftIndex >= mHeap.size() ? 0 : leftIndex);
+	private int getLeft(int pIndex) {
+		int leftIndex =  (pIndex * 2 + 1);
+		return (leftIndex >= mHeap.size() ? -1 : leftIndex);
 	}
 	
-	private int getRight(int index) {
-		int rightIndex =   (index * 2 + 2);
-		return (rightIndex >= mHeap.size() ? 0 : rightIndex);
+	private int getRight(int pIndex) {
+		int rightIndex =   (pIndex * 2 + 2);
+		return (rightIndex >= mHeap.size() ? -1 : rightIndex);
+	}
+	
+	private static class BinaryHeapIterator <T> implements Iterable<T>, Iterator<T> {
+
+		private ArrayList<T> mHeap;
+		private int mSize;
+		private int mCursor;
+		
+		public BinaryHeapIterator(ArrayList<T> heap) {
+			mHeap = heap;
+			mSize = heap.size();
+			mCursor = 0;
+		}
+		
+		@Override
+		public Iterator<T> iterator() {
+			return this;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return (mCursor != mSize);
+		}
+
+		@Override
+		public T next() {
+			return mHeap.get(mCursor++);
+		}		
 	}
 }

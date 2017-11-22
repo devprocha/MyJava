@@ -27,6 +27,10 @@ public class MyArrayIterator<T> implements Iterator<T>, Iterable<T> {
 		return mItems[mCursor++];
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Iterable#iterator()
+	 */
 	@Override
 	public Iterator<T> iterator() {
 		return this;

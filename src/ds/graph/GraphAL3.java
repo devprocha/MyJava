@@ -7,13 +7,11 @@ import java.util.LinkedList;
 
 public class GraphAL3<T> {
 	private ArrayList<Node<T>> mNodeList;
-	private HashSet<T> mVisitedSet; //why set? lookup is faster O(1)
-	LinkedList<Node<T>> mQueue;
+	private boolean mDirected = false;
 	
-	public GraphAL3() {
+	public GraphAL3(boolean directed) {
 		mNodeList = new ArrayList<Node<T>>();
-		mVisitedSet = new HashSet<T>();
-		mQueue = new LinkedList<Node<T>>();
+		mDirected = directed;
 	}
 	
 	public boolean add(T src) {
@@ -29,10 +27,10 @@ public class GraphAL3<T> {
 		Node<T> destNode = getNode(dest);
 		if (destNode == null) {
 			return false;
-		}
-		
+		}		
 		srcNode.addEdge(destNode);
-		destNode.addEdge(srcNode);//undirected graph
+		if (!mDirected)
+			destNode.addEdge(srcNode);//undirected graph
 		return true;
 	}
 	
@@ -59,7 +57,7 @@ public class GraphAL3<T> {
 	
 	private boolean remove(Node<T> node) {		
 		mNodeList.remove(node);		
-		// Dissociate all edges		
+		// Dissociate all edges
 		return removeAllEdges(node);
 	}
 	
@@ -116,7 +114,6 @@ public class GraphAL3<T> {
 		return false;
 	}
 	
-	
 	private boolean removeAllEdges(Node<T> node) {
 		LinkedHashSet<Node<T>> edgeSet = node.getEdgeSet();
 		LinkedHashSet<Node<T>> tempedgeSet;
@@ -128,7 +125,7 @@ public class GraphAL3<T> {
 	}
 	
 	/*
-	 * Uses BFS approach
+	 * Uses BFS approach using while loop
 	 */
 	public boolean hasPathBFS(T src, T dest) {
 		Node<T> srcNode = getNode(src);
@@ -139,41 +136,25 @@ public class GraphAL3<T> {
 		if (destNode == null) {
 			return false;
 		}
-		LinkedHashSet<Node<T>> srcEdgeSet = srcNode.getEdgeSet();
-		if (srcEdgeSet.contains(destNode))
-			return true;
 		
-		mVisitedSet.clear();
-		mQueue.clear();
-		mVisitedSet.add(srcNode.getData());
-		mQueue.addAll(srcEdgeSet);
-		boolean retStatus = hasPathBFS(mQueue.poll(), destNode);
-		mQueue.clear();
-		mVisitedSet.clear();
-		return retStatus;
-	}
-		
-	/*
-	 * Uses BFS approach
-	 */
-	private boolean hasPathBFS(Node<T> currNode, Node<T> destNode) {		
-		if (!mVisitedSet.contains(currNode.getData())) {
-			mVisitedSet.add(currNode.getData());
-			LinkedHashSet<Node<T>> edgeSet = currNode.getEdgeSet();
-			boolean contains = edgeSet.contains(destNode);
-			if (contains) {
-				return true;
-			}
-			mQueue.addAll(edgeSet);
+		LinkedList<Node<T>> queue = new LinkedList<Node<T>>();
+		queue.add(srcNode);
+		HashSet<Node<T>> visitedSet = new HashSet<Node<T>>();	
+		while (!queue.isEmpty()) {
+			Node<T> node = queue.poll();		
+			if (visitedSet.contains(node))
+				continue;			
+			visitedSet.add(node);			
+			LinkedHashSet<Node<T>> edgeSet = node.getEdgeSet();
+			if (edgeSet.contains(destNode))
+				return true;			
+			queue.addAll(edgeSet);
 		}
-		if (mQueue.isEmpty()) {
-			return false;
-		}
-		return hasPathBFS(mQueue.poll(), destNode);
+		return false;
 	}
 	
 	/*
-	 * Uses BFS approach
+	 * Uses BFS approach using recursion
 	 */
 	public boolean hasPathBFS2(T src, T dest) {
 		Node<T> srcNode = getNode(src);
@@ -184,35 +165,33 @@ public class GraphAL3<T> {
 		if (destNode == null) {
 			return false;
 		}
-		return hasPathBFS2(srcNode, destNode);
+		
+		LinkedList<Node<T>> queue = new LinkedList<Node<T>>();
+		queue.add(srcNode);		
+		HashSet<Node<T>> visitedSet = new HashSet<Node<T>>();
+		return hasPathBFS2(queue, visitedSet, destNode);
 	}
 	
-	/*
-	 * Uses BFS approach using while loop
-	 */
-	private boolean hasPathBFS2(Node<T> srcNode, Node<T> destNode) {				
-		HashSet<T> visitedSet = new HashSet<T>();
-		LinkedList<Node<T>> nextToVisit = new LinkedList<Node<T>>(srcNode.getEdgeSet());
-			
-		Node<T> node;
-		LinkedHashSet<Node<T>> edgeSet;
-		while (!nextToVisit.isEmpty()) {
-			node = nextToVisit.poll();
-			if (!visitedSet.contains(node.getData())){
-				visitedSet.add(node.getData());
-				edgeSet = node.getEdgeSet();
-				if (edgeSet.contains(destNode)) {
-					return true;
-				} 
-				nextToVisit.addAll(edgeSet);
-			}
-		}		
-		return false;		
+	private boolean hasPathBFS2(LinkedList<Node<T>> queue, HashSet<Node<T>> visitedSet, Node<T> destNode) {
+		if (queue.isEmpty())
+			return false;
+		
+		Node<T> node = queue.poll();			
+		if (!visitedSet.contains(node)){
+			visitedSet.add(node);			
+			LinkedHashSet<Node<T>> edgeSet = node.getEdgeSet();
+			if (edgeSet.contains(destNode))
+				return true;	
+			queue.addAll(edgeSet);	
+		}
+		return hasPathBFS2(queue, visitedSet, destNode);
 	}
-	
+		
 	/*
-	 * Uses DFS approach using recursion
+	 * Uses DFS approach using recursion 
+	 * DFS approach is not efficient for finding path
 	 */
+	
 	public boolean hasPathDFS(T src, T dest) {
 		Node<T> srcNode = getNode(src);
 		if (srcNode == null) {
@@ -222,43 +201,31 @@ public class GraphAL3<T> {
 		if (destNode == null) {
 			return false;
 		}
-		LinkedHashSet<Node<T>> srcEdgeSet = srcNode.getEdgeSet();
-		if (srcEdgeSet.contains(destNode))
-			return true;
-		
-		mVisitedSet.clear();
-		mVisitedSet.add(srcNode.getData());
-		mQueue.addAll(srcEdgeSet);
-		boolean retStatus = hasPathDFS(mQueue.poll(), destNode);
-		mVisitedSet.clear();
-		return retStatus;
+		LinkedList<Node<T>> visitedList = new LinkedList<Node<T>>();
+		visitedList.add(srcNode);
+		return hasPathDFS(visitedList, destNode);
 	}
 	
-	/*
-	 * Uses DFS approach - Visit all the nodes deep depth
-	 */
-	private boolean hasPathDFS(Node<T> currNode, Node<T> destNode) {
-		if (mVisitedSet.contains(currNode.getData())) {
-			return false; // already visited
-		}
-		mVisitedSet.add(currNode.getData());
-		
-		//check current node has path to destNode
-		LinkedHashSet<Node<T>> edgeSet = currNode.getEdgeSet();
-		if (edgeSet.contains(destNode)) {
+	private boolean hasPathDFS(LinkedList<Node<T>> visitedList, Node<T> destNode) {		
+		Node<T> node = visitedList.getLast();		
+		if (node.equals(destNode)) {
 			return true;
-		}
-		
-		////current node doesn't have path to destNode, ask his child/adjacent node recursively
-		for (Node<T> adjNode : edgeSet) {
-			if(hasPathDFS (adjNode, destNode)) {
-				return true;
+		}		
+		for (Node<T> adjNode: node.getEdgeSet()) {
+			if (!visitedList.contains(adjNode)) {
+				visitedList.add(adjNode);
+				if (hasPathDFS(visitedList, destNode))
+					return true;
+				//not found go to next adj node
 			}
-			//not found go to next adj node
-		}
+		}		
 		return false;
 	}
 	
+	/*
+	 * Returns all the possible paths between source node and destination node using DFS  
+	 * Time Complexity: O(|V| + |E|)
+	 */
 	public ArrayList<LinkedList<T>> getAllPaths(T src, T dest) {
 		Node<T> srcNode = getNode(src);
 		if (srcNode == null) {
@@ -267,27 +234,33 @@ public class GraphAL3<T> {
 		Node<T> destNode = getNode(dest);
 		if (destNode == null) {
 			return null;
-		}		
+		}
+		
+		// Maintain visited list stack
 		LinkedList<Node<T>> visitedList = new LinkedList<Node<T>>();
 		visitedList.add(srcNode);
+		
 		ArrayList<LinkedList<T>> pathsList = new ArrayList<LinkedList<T>>();
 		getPathsDFS(destNode, visitedList, pathsList);
+		visitedList.removeLast();
 		return pathsList;
 	}
 	
 	private boolean getPathsDFS(Node<T> destNode, LinkedList<Node<T>> visitedList, ArrayList<LinkedList<T>> pathsList) {
-		Node<T> currNode = visitedList.getLast();		
-		if (currNode.equals(destNode)) {			
+		Node<T> currNode = visitedList.getLast();
+		// Check we reached destination node or not
+		if (currNode.equals(destNode)) {		
 			return true;
 		}
-				
+		
+		// Repeat with current node edges
 		for (Node<T> adjNode : currNode.getEdgeSet()) {
 			if (!visitedList.contains(adjNode)) {
 				visitedList.add(adjNode);
 				if (getPathsDFS(destNode, visitedList, pathsList)) {
 					copyDataPath(visitedList, pathsList);
 				}
-				visitedList.removeLast();		
+				visitedList.removeLast();
 			}
 		}
 		return false;
